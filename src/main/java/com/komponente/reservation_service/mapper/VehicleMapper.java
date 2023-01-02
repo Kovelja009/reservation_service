@@ -1,32 +1,29 @@
 package com.komponente.reservation_service.mapper;
 
+import com.komponente.reservation_service.dto.ModelDto;
+import com.komponente.reservation_service.dto.TypeDto;
 import com.komponente.reservation_service.dto.VehicleDto;
 import com.komponente.reservation_service.exceptions.NotFoundException;
-import com.komponente.reservation_service.model.City;
-import com.komponente.reservation_service.model.Company;
-import com.komponente.reservation_service.model.Model;
-import com.komponente.reservation_service.model.Vehicle;
+import com.komponente.reservation_service.model.*;
 import com.komponente.reservation_service.repository.CityRepository;
 import com.komponente.reservation_service.repository.CompanyRepository;
 import com.komponente.reservation_service.repository.ModelRepository;
+import com.komponente.reservation_service.repository.TypeRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-
+@AllArgsConstructor
 @Component
 public class VehicleMapper {
     private CityRepository cityRepo;
     private CompanyRepository companyRepo;
     private ModelRepository modelRepo;
+    private TypeRepository typeRepo;
 
-    public VehicleMapper(CityRepository cityRepo, CompanyRepository companyRepo, ModelRepository modelRepo) {
-        this.cityRepo = cityRepo;
-        this.companyRepo = companyRepo;
-        this.modelRepo = modelRepo;
-    }
 
     public Vehicle vehicleDtoToVehicle(VehicleDto vehicleDto) {
-        Optional<City> city = cityRepo.findByName(vehicleDto.getCity());
+        Optional<City> city = cityRepo.findByCity(vehicleDto.getCity());
         if(city.isEmpty())
             throw new NotFoundException("City with name " + vehicleDto.getCity() + " not found");
 
@@ -45,5 +42,22 @@ public class VehicleMapper {
         vehicle.setPricePerDay(vehicleDto.getPricePerDay());
 
         return vehicle;
+    }
+
+    public Model modelDtoToModel(ModelDto modeldto){
+        Optional<Type> type = typeRepo.findByType(modeldto.getType());
+        if(type.isEmpty())
+            throw new NotFoundException("Type " + modeldto.getType() + " not found");
+        Model model = new Model();
+        model.setModel(modeldto.getModel());
+        model.setType(type.get());
+
+        return model;
+    }
+
+    public Type typeDtoToType(TypeDto typedto){
+        Type type = new Type();
+        type.setType(typedto.getType());
+        return type;
     }
 }
