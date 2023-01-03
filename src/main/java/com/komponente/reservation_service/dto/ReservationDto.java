@@ -9,6 +9,7 @@ import java.sql.Date;
 @Setter
 public class ReservationDto {
     private String plateNumber;
+    private String username;
     private Date startDate;
     private Date endDate;
     private int price;

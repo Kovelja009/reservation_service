@@ -6,10 +6,7 @@ import com.komponente.reservation_service.service.ReservationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
@@ -19,5 +16,10 @@ public class ReservationController {
     @PostMapping("/create")
     public ResponseEntity<ReservationDto> createReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
         return new ResponseEntity<>(reservationService.createReservation(reservationCreateDto), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ReservationDto> deleteReservation(@RequestBody ReservationDto reservationDto) {
+        return new ResponseEntity<>(reservationService.deleteReservation(reservationDto), HttpStatus.OK);
     }
 }
