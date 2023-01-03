@@ -1,17 +1,22 @@
 package com.komponente.reservation_service.service.impl;
 
 import com.komponente.reservation_service.dto.VehicleDto;
+import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.mapper.VehicleMapper;
 import com.komponente.reservation_service.model.Company;
 import com.komponente.reservation_service.model.Model;
+import com.komponente.reservation_service.model.Reservation;
 import com.komponente.reservation_service.model.Vehicle;
 import com.komponente.reservation_service.repository.CompanyRepository;
 import com.komponente.reservation_service.repository.ModelRepository;
+import com.komponente.reservation_service.repository.ReservationRepository;
 import com.komponente.reservation_service.repository.VehicleRepository;
 import com.komponente.reservation_service.service.VehicleService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +27,7 @@ public class VehicleServiceImpl implements VehicleService {
     private VehicleMapper vehicleMapper;
     private ModelRepository modelRepo;
     private CompanyRepository companyRepo;
+    private ReservationRepository reservationRepo;
 
     @Override
     public VehicleDto addVehicle(VehicleDto vehicleDto) {
@@ -43,6 +49,7 @@ public class VehicleServiceImpl implements VehicleService {
             throw new IllegalStateException("Vehicle with plate number " + plateNumber + " does not exist");
     }
 
+
     @Override
     public String changePriceForModel(String model, String company, int newPrice) {
         Model mdl = modelRepo.findByModel(model).get();
@@ -58,5 +65,59 @@ public class VehicleServiceImpl implements VehicleService {
         } else {
             throw new IllegalStateException("Model " + model + " does not exist");
         }
+    }
+
+    @Override
+    public List<VehicleDto> getAllAvailableVehicles(String city, String company, Date startDate, Date endDate) {
+        int query = getRightQuery(city, company);
+        Optional<List<Vehicle>> vehicleOptional = null;
+
+        switch (query) {
+            case 1 -> vehicleOptional = vehicleRepo.findByCityAndCompany(city, company);
+            case 2 -> vehicleOptional = vehicleRepo.findByCity(city);
+            case 3 -> vehicleOptional = vehicleRepo.findByCompany(company);
+            case 4 -> vehicleOptional = vehicleRepo.findAllAvailableVehicles();
+        }
+
+        if(vehicleOptional.isEmpty())
+            throw new NotFoundException("No vehicles found");
+
+        List<Vehicle> vehiclesList = vehicleOptional.get();
+
+
+        List<VehicleDto> vehicles = new ArrayList<>();
+
+        for(Vehicle vehicle : vehiclesList) {
+            Optional<List<Reservation>> reservationsOptional = reservationRepo.findByVehicle(vehicle);
+            if(vehicleOptional.isEmpty())
+                vehicles.add(vehicleMapper.vehicleToVehicleDto(vehicle));
+            else{
+                List<Reservation> reservations = reservationsOptional.get();
+                boolean available = true;
+                for(Reservation reservation : reservations) {
+                    if(startDate.after(reservation.getEndDate()) || endDate.before(reservation.getStartDate()))
+                        available = true;
+                    else {
+                        available = false;
+                        break;
+                    }
+                }
+                if(available)
+                    vehicles.add(vehicleMapper.vehicleToVehicleDto(vehicle));
+            }
+        }
+
+        return vehicles;
+    }
+
+    private int getRightQuery(String city, String company) {
+        if(!city.equals("") && !company.equals(""))
+            return 1;
+        else if(!city.equals("") && company.equals(""))
+            return 2;
+        else if(city.equals("") && !company.equals(""))
+            return 3;
+        else
+            return 4;
     }
 }

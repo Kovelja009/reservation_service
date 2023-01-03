@@ -60,4 +60,15 @@ public class VehicleMapper {
         type.setType(typedto.getType());
         return type;
     }
+
+    public VehicleDto vehicleToVehicleDto(Vehicle vehicle) {
+        VehicleDto vehicleDto = new VehicleDto();
+        vehicleDto.setPlateNumber(vehicle.getPlateNumber());
+        vehicleDto.setModel(vehicle.getModel().getModel());
+        vehicleDto.setType(vehicle.getModel().getType().getType());
+        vehicleDto.setCompany(vehicle.getCompany().getName());
+        vehicleDto.setCity(vehicle.getCity().getCity());
+        vehicleDto.setPricePerDay(vehicle.getPricePerDay());
+        return vehicleDto;
+    }
 }

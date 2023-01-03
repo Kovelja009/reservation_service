@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/vehicle")
@@ -44,5 +47,11 @@ public class VehicleController {
     @PostMapping("/add_model")
     public ResponseEntity<ModelDto> addModel(@RequestBody @Valid ModelDto modelDto) {
         return new ResponseEntity<>(modelService.addModel(modelDto), HttpStatus.OK);
+    }
+
+//    city and company are optional (empty string if not specified) but dates must be specified
+    @PostMapping("/available_vehicles")
+    public ResponseEntity<List<VehicleDto>> getAllAvailableVehicles(@RequestParam String city, @RequestParam String company, @RequestParam Date startDate, @RequestParam Date endDate) {
+        return new ResponseEntity<>(vehicleService.getAllAvailableVehicles(city, company, startDate, endDate), HttpStatus.OK);
     }
 }
