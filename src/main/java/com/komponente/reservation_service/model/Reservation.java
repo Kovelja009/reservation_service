@@ -15,12 +15,13 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     private Vehicle vehicle;
 
-    private Long clientId;
+    private Long userId;
 
     private Date startDate;
     private Date endDate;
+    private int price;
 
 }

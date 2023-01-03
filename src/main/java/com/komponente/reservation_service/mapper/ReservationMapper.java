@@ -1,5 +1,6 @@
 package com.komponente.reservation_service.mapper;
 
+import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
 import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.model.Reservation;
@@ -17,7 +18,7 @@ public class ReservationMapper {
         this.vehicleRepo = vehicleRepository;
     }
 
-    public Reservation reservationDtoToReservation(ReservationDto reservationDto) {
+    public Reservation reservationCreateDtoToReservation(ReservationCreateDto reservationDto) {
         Optional<Vehicle> vehicle = vehicleRepo.findByPlateNumber(reservationDto.getPlateNumber());
         if(vehicle.isEmpty())
             throw new NotFoundException("Vehicle with plate number " + reservationDto.getPlateNumber() + " not found");
@@ -25,7 +26,17 @@ public class ReservationMapper {
         reservation.setVehicle(vehicle.get());
         reservation.setStartDate(reservationDto.getStartDate());
         reservation.setEndDate(reservationDto.getEndDate());
-//        TODO u servisu dodati ClientId preko restTemplate-a
+        reservation.setUserId(reservationDto.getUserId());
+
+        return reservation;
+    }
+
+    public ReservationDto reservationCreateDtoToReservationDto(ReservationCreateDto reservationDto) {
+        ReservationDto reservation = new ReservationDto();
+        reservation.setPlateNumber(reservationDto.getPlateNumber());
+        reservation.setStartDate(reservationDto.getStartDate());
+        reservation.setEndDate(reservationDto.getEndDate());
+
         return reservation;
     }
 }
