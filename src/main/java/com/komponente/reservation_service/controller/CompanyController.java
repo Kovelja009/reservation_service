@@ -1,6 +1,7 @@
 package com.komponente.reservation_service.controller;
 
 import com.komponente.reservation_service.dto.CompanyDto;
+import com.komponente.reservation_service.dto.CompanyIdDto;
 import com.komponente.reservation_service.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,5 +30,10 @@ public class CompanyController {
     @PostMapping("/add_company")
     public ResponseEntity<CompanyDto> addCompany(@RequestBody @Valid CompanyDto companyDto) {
         return new ResponseEntity<>(companyService.addCompany(companyDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/get_company")
+    public ResponseEntity<CompanyIdDto> getCompany(@RequestParam @Valid String name) {
+        return new ResponseEntity<>(companyService.getCompany(name), HttpStatus.OK);
     }
 }

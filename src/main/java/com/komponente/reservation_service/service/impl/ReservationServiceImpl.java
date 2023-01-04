@@ -32,7 +32,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new IllegalArgumentException("End date must be after start date");
 
         ReservationDto reservationDto = reservationMapper.reservationCreateDtoToReservationDto(reservationCreateDto);
-        ResponseEntity<UserDto> userDto = userServiceRestTemplate.exchange("/user/username?id="+reservationCreateDto.getUserId(), HttpMethod.GET, null, UserDto.class);
+        ResponseEntity<UserDto> userDto = userServiceRestTemplate.exchange("/user/id?id="+reservationCreateDto.getUserId(), HttpMethod.GET, null, UserDto.class);
         reservationDto.setUsername(userDto.getBody().getUsername());
 //        get discount from user service
         int days_between = (int) (((reservationDto.getEndDate().getTime() - reservationDto.getStartDate().getTime()) / (1000 * 60 * 60 * 24))+1);

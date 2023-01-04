@@ -1,6 +1,7 @@
 package com.komponente.reservation_service.service.impl;
 
 import com.komponente.reservation_service.dto.CompanyDto;
+import com.komponente.reservation_service.dto.CompanyIdDto;
 import com.komponente.reservation_service.mapper.CompanyMapper;
 import com.komponente.reservation_service.model.Company;
 import com.komponente.reservation_service.repository.CompanyRepository;
@@ -44,5 +45,15 @@ public class CompanyServiceImpl implements CompanyService {
         Company company = companyMapper.companyDtoToCompany(companyDto);
         companyRepo.save(company);
         return companyDto;
+    }
+
+    @Override
+    public CompanyIdDto getCompany(String name) {
+        Optional<Company> optionalCompany = companyRepo.findByName(name);
+        if (optionalCompany.isEmpty())
+            throw new IllegalArgumentException("Company with name " + name + " does not exist");
+        CompanyIdDto companyIdDto = new CompanyIdDto();
+        companyIdDto.setId(optionalCompany.get().getId());
+        return companyIdDto;
     }
 }

@@ -6,12 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReviewDto {
-    private int rating;
+public class CompanyIdDto {
     @NotBlank
-    private String comment;
-    @NotBlank
-    private String vehiclePlateNumber;
-    @NotBlank
-    private String username;
+    Long id;
 }

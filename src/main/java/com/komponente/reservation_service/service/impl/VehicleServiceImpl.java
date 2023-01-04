@@ -79,7 +79,7 @@ public class VehicleServiceImpl implements VehicleService {
             case 4 -> vehicleOptional = vehicleRepo.findAllAvailableVehicles();
         }
 
-        if(vehicleOptional.isEmpty())
+        if(vehicleOptional.isEmpty() || vehicleOptional.get().isEmpty())
             throw new NotFoundException("No vehicles found");
 
         List<Vehicle> vehiclesList = vehicleOptional.get();
@@ -110,7 +110,7 @@ public class VehicleServiceImpl implements VehicleService {
         return vehicles;
     }
 
-    private int getRightQuery(String city, String company) {
+    protected static int getRightQuery(String city, String company) {
         if(!city.equals("") && !company.equals(""))
             return 1;
         else if(!city.equals("") && company.equals(""))

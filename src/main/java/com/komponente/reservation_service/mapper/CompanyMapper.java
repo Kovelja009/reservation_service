@@ -13,7 +13,12 @@ public class CompanyMapper {
         return company;
     }
 
-
+    public CompanyDto companyToCompanyDto(Company company) {
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setName(company.getName());
+        companyDto.setInfo(company.getInfo());
+        return companyDto;
+    }
 
 
 }
