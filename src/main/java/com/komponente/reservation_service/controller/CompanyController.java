@@ -3,7 +3,7 @@ package com.komponente.reservation_service.controller;
 import com.komponente.reservation_service.dto.CompanyDto;
 import com.komponente.reservation_service.dto.CompanyIdDto;
 import com.komponente.reservation_service.service.CompanyService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

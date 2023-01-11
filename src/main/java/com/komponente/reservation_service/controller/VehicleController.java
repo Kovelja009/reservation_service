@@ -6,7 +6,7 @@ import com.komponente.reservation_service.dto.VehicleDto;
 import com.komponente.reservation_service.service.ModelService;
 import com.komponente.reservation_service.service.TypeService;
 import com.komponente.reservation_service.service.VehicleService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

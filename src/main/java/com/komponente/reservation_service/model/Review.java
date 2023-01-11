@@ -1,7 +1,7 @@
 package com.komponente.reservation_service.model;
 
 import com.komponente.reservation_service.dto.CompanyRating;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 

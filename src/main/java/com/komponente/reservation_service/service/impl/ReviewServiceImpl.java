@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -43,7 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void deleteReview(long userId, String vehiclePlateNumber) {
         Optional<Review> review = reviewRepo.findReviewForDeleting(vehiclePlateNumber, userId);
-        if (review.isEmpty())
+        if (!review.isPresent())
             throw new IllegalArgumentException("Review for vehicle with plate number " + vehiclePlateNumber + " and user with id " + userId + " not found");
         reviewRepo.delete(review.get());
     }
@@ -52,7 +53,7 @@ public class ReviewServiceImpl implements ReviewService {
     public void updateReview(ReviewDto reviewDto) {
         ResponseEntity<UserIdDto> userId =  userServiceRestTemplate.exchange("/user/username?username="+reviewDto.getUsername(), HttpMethod.GET, null, UserIdDto.class);
         Optional<Review> review = reviewRepo.findReviewForDeleting(reviewDto.getVehiclePlateNumber(), userId.getBody().getId());
-        if (review.isEmpty())
+        if (!review.isPresent())
             throw new IllegalArgumentException("Review for vehicle with plate number " + reviewDto.getVehiclePlateNumber() + " and user with id " + userId.getBody().getId() + " not found");
         review.get().setComment(reviewDto.getComment());
         review.get().setRating(reviewDto.getRating());
@@ -66,23 +67,30 @@ public class ReviewServiceImpl implements ReviewService {
         Optional<List<Review>> reviewOptional = null;
 
         switch (query) {
-            case 1 -> reviewOptional = reviewRepo.findByCityAndCompany(city, company);
-            case 2 -> reviewOptional = reviewRepo.findByCity(city);
-            case 3 -> reviewOptional = reviewRepo.findByCompany(company);
-            case 4 -> reviewOptional = reviewRepo.findAllReviews();
+            case 1 :
+                reviewOptional = reviewRepo.findByCityAndCompany(city, company);
+                break;
+            case 2 :
+                reviewOptional = reviewRepo.findByCity(city);
+                break;
+            case 3 :
+                reviewOptional = reviewRepo.findByCompany(company);
+                break;
+            case 4 :
+                reviewOptional = reviewRepo.findAllReviews();
         }
 
-        if(reviewOptional.isEmpty() || reviewOptional.get().isEmpty())
+        if(!reviewOptional.isPresent() || reviewOptional.get().isEmpty())
             throw new IllegalArgumentException("No reviews found");
 
-        List<ReviewDto> reviews = reviewOptional.get().stream().map(reviewMapper::reviewToReviewDto).toList();
+        List<ReviewDto> reviews = reviewOptional.get().stream().map(reviewMapper::reviewToReviewDto).collect(Collectors.toList());
 
         return reviews;
     }
 
     @Override
     public List<CompanyRating> companyRatings() {
-        if(reviewRepo.findCompanyRating().isEmpty())
+        if(!reviewRepo.findCompanyRating().isPresent())
             throw new IllegalArgumentException("No reviews found");
         return reviewRepo.findCompanyRating().get();
     }

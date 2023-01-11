@@ -24,14 +24,14 @@ public class VehicleMapper {
 
     public Vehicle vehicleDtoToVehicle(VehicleDto vehicleDto) {
         Optional<City> city = cityRepo.findByCity(vehicleDto.getCity());
-        if(city.isEmpty())
+        if(!city.isPresent())
             throw new NotFoundException("City with name " + vehicleDto.getCity() + " not found");
 
         Optional<Company> company = companyRepo.findByName(vehicleDto.getCompany());
-        if(company.isEmpty())
+        if(!company.isPresent())
             throw new NotFoundException("Company with name " + vehicleDto.getCompany() + " not found");
         Optional<Model> model = modelRepo.findByModel(vehicleDto.getModel());
-        if(model.isEmpty())
+        if(!model.isPresent())
             throw new NotFoundException("Model with name " + vehicleDto.getModel() + " not found");
 
         Vehicle vehicle = new Vehicle();
@@ -46,7 +46,7 @@ public class VehicleMapper {
 
     public Model modelDtoToModel(ModelDto modeldto){
         Optional<Type> type = typeRepo.findByType(modeldto.getType());
-        if(type.isEmpty())
+        if(!type.isPresent())
             throw new NotFoundException("Type " + modeldto.getType() + " not found");
         Model model = new Model();
         model.setModel(modeldto.getModel());

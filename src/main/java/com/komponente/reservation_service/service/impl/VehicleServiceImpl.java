@@ -73,13 +73,20 @@ public class VehicleServiceImpl implements VehicleService {
         Optional<List<Vehicle>> vehicleOptional = null;
 
         switch (query) {
-            case 1 -> vehicleOptional = vehicleRepo.findByCityAndCompany(city, company);
-            case 2 -> vehicleOptional = vehicleRepo.findByCity(city);
-            case 3 -> vehicleOptional = vehicleRepo.findByCompany(company);
-            case 4 -> vehicleOptional = vehicleRepo.findAllAvailableVehicles();
+            case 1 :
+                vehicleOptional = vehicleRepo.findByCityAndCompany(city, company);
+                break;
+            case 2 :
+                vehicleOptional = vehicleRepo.findByCity(city);
+                break;
+            case 3 :
+                vehicleOptional = vehicleRepo.findByCompany(company);
+                break;
+            case 4 :
+                vehicleOptional = vehicleRepo.findAllAvailableVehicles();
         }
 
-        if(vehicleOptional.isEmpty() || vehicleOptional.get().isEmpty())
+        if(!vehicleOptional.isPresent() || vehicleOptional.get().isEmpty())
             throw new NotFoundException("No vehicles found");
 
         List<Vehicle> vehiclesList = vehicleOptional.get();
@@ -89,7 +96,7 @@ public class VehicleServiceImpl implements VehicleService {
 
         for(Vehicle vehicle : vehiclesList) {
             Optional<List<Reservation>> reservationsOptional = reservationRepo.findByVehicle(vehicle);
-            if(vehicleOptional.isEmpty())
+            if(!vehicleOptional.isPresent())
                 vehicles.add(vehicleMapper.vehicleToVehicleDto(vehicle));
             else{
                 List<Reservation> reservations = reservationsOptional.get();

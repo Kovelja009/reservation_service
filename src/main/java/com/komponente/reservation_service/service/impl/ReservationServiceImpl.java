@@ -57,7 +57,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationDto deleteReservation(ReservationDto reservationDto) {
         Optional<Reservation> reservation = reservationRepo.findReservationForDeleting(reservationDto.getPlateNumber(), reservationDto.getStartDate(), reservationDto.getEndDate());
-        if(reservation.isEmpty())
+        if(!reservation.isPresent())
             throw new IllegalArgumentException("Reservation not found");
 
 //      notify user service

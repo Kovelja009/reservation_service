@@ -1,7 +1,7 @@
 package com.komponente.reservation_service.model;
 
-import jakarta.persistence.*;
-import jakarta.persistence.GenerationType;
+import javax.persistence.*;
+import javax.persistence.GenerationType;
 import lombok.Getter;
 import lombok.Setter;
 

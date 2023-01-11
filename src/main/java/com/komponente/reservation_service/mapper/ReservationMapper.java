@@ -20,7 +20,7 @@ public class ReservationMapper {
 
     public Reservation reservationCreateDtoToReservation(ReservationCreateDto reservationDto) {
         Optional<Vehicle> vehicle = vehicleRepo.findByPlateNumber(reservationDto.getPlateNumber());
-        if(vehicle.isEmpty())
+        if(!vehicle.isPresent())
             throw new NotFoundException("Vehicle with plate number " + reservationDto.getPlateNumber() + " not found");
         Reservation reservation = new Reservation();
         reservation.setVehicle(vehicle.get());

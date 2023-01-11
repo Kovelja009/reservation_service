@@ -22,7 +22,7 @@ public class ReviewMapper {
     private RestTemplate userServiceRestTemplate;
     public Review reviewCreateDtoToReview(ReviewCreateDto reviewDto) {
         Optional<Vehicle> vehicle = vehicleRepo.findByPlateNumber(reviewDto.getVehiclePlateNumber());
-        if(vehicle.isEmpty())
+        if(!vehicle.isPresent())
             throw new NotFoundException("Vehicle with plate number " + reviewDto.getVehiclePlateNumber() + " not found");
         Review review = new Review();
         review.setVehicle(vehicle.get());

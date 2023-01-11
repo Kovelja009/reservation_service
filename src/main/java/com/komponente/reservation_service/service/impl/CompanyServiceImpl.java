@@ -50,7 +50,7 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public CompanyIdDto getCompany(String name) {
         Optional<Company> optionalCompany = companyRepo.findByName(name);
-        if (optionalCompany.isEmpty())
+        if (!optionalCompany.isPresent())
             throw new IllegalArgumentException("Company with name " + name + " does not exist");
         CompanyIdDto companyIdDto = new CompanyIdDto();
         companyIdDto.setId(optionalCompany.get().getId());
