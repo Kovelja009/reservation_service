@@ -85,6 +85,8 @@ public class ReservationServiceImpl implements ReservationService {
             ResponseEntity<UserDto> userDto =  userServiceRestTemplate.exchange("/user/id?id="+reserv.getUserId(), HttpMethod.GET, null, UserDto.class);
             if(userDto.getBody()==null)
                 throw new IllegalArgumentException("No user found ");
+            reserv.setReminded(true);
+            reservationRepo.save(reserv);
             reminders.add(reservationMapper.notificationFromReservation(userDto.getBody(),reserv));
         }
         return reminders;
