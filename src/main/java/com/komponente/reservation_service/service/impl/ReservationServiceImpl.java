@@ -2,6 +2,7 @@ package com.komponente.reservation_service.service.impl;
 
 import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
+import com.komponente.reservation_service.dto.ReviewDto;
 import com.komponente.reservation_service.mapper.ReservationMapper;
 import com.komponente.reservation_service.model.Reservation;
 import com.komponente.reservation_service.repository.ReservationRepository;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -68,5 +71,29 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepo.delete(reservation.get());
 
         return reservationDto;
+    }
+
+    @Override
+    public List<ReservationDto> getReservationsToReminded() {
+        Optional<List<Reservation>> reservation = reservationRepo.findReservationForRemind();
+        if(!reservation.isPresent() || reservation.get().isEmpty())
+            throw new IllegalArgumentException("No reviews found");
+        return reservation.get().stream().map(reservationMapper::reservationToReservationDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReservationDto> getReservations() {
+        Optional<List<Reservation>> reservation = reservationRepo.findAllReservations();
+        if(!reservation.isPresent() || reservation.get().isEmpty())
+            throw new IllegalArgumentException("No reviews found");
+        return reservation.get().stream().map(reservationMapper::reservationToReservationDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReservationDto> getReservationsForUser(Long userId) {
+        Optional<List<Reservation>> reservation = reservationRepo.findByUserId(userId);
+        if(!reservation.isPresent() || reservation.get().isEmpty())
+            throw new IllegalArgumentException("No reviews found");
+        return reservation.get().stream().map(reservationMapper::reservationToReservationDto).collect(Collectors.toList());
     }
 }

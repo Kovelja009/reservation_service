@@ -23,5 +23,5 @@ public class Reservation {
     private Date startDate;
     private Date endDate;
     private int price;
-
+    private boolean reminded;
 }

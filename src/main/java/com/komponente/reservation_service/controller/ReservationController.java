@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/reservation")
@@ -21,5 +24,21 @@ public class ReservationController {
     @DeleteMapping("/delete")
     public ResponseEntity<ReservationDto> deleteReservation(@RequestBody ReservationDto reservationDto) {
         return new ResponseEntity<>(reservationService.deleteReservation(reservationDto), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationDto>> getReservationsById(@RequestParam Long userId) {
+        return new ResponseEntity<>(reservationService.getReservationsForUser(userId), HttpStatus.OK);
+    }
+    //TODO dodati put za rezervacije reminded true
+
+    @GetMapping
+    public ResponseEntity<List<ReservationDto>> getReservationsToRemind() {
+        return new ResponseEntity<>(reservationService.getReservationsToReminded(), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationDto>> getReservations() {
+        return new ResponseEntity<>(reservationService.getReservations(), HttpStatus.OK);
     }
 }

@@ -6,6 +6,7 @@ import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.model.Reservation;
 import com.komponente.reservation_service.model.Vehicle;
 import com.komponente.reservation_service.repository.VehicleRepository;
+import com.sun.xml.bind.v2.TODO;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -38,5 +39,15 @@ public class ReservationMapper {
         reservation.setEndDate(reservationDto.getEndDate());
 
         return reservation;
+    }
+    //TODO izmeniti username
+    public ReservationDto reservationToReservationDto(Reservation reservation){
+        ReservationDto reservationDto = new ReservationDto();
+        reservationDto.setPrice(reservation.getPrice());
+        reservationDto.setUsername(reservation.getUserId().toString());
+        reservationDto.setPlateNumber(reservation.getVehicle().getPlateNumber());
+        reservationDto.setStartDate(reservation.getStartDate());
+        reservationDto.setEndDate(reservation.getEndDate());
+        return reservationDto;
     }
 }
