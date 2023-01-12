@@ -1,5 +1,6 @@
 package com.komponente.reservation_service.service.impl;
 
+import com.komponente.reservation_service.dto.NotificationDto;
 import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
 import com.komponente.reservation_service.dto.ReviewDto;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -74,11 +76,18 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<ReservationDto> getReservationsToReminded() {
-        Optional<List<Reservation>> reservation = reservationRepo.findReservationForRemind();
-        if(!reservation.isPresent() || reservation.get().isEmpty())
-            throw new IllegalArgumentException("No reviews found");
-        return reservation.get().stream().map(reservationMapper::reservationToReservationDto).collect(Collectors.toList());
+    public List<NotificationDto> getReservationsToReminded() {
+        Optional<List<Reservation>> reservations = reservationRepo.findReservationForRemind();
+        List<NotificationDto> reminders = new ArrayList<>();
+        if(!reservations.isPresent() || reservations.get().isEmpty())
+            throw new IllegalArgumentException("No reservations to remind");
+        for(Reservation reserv:reservations.get()){
+            ResponseEntity<UserDto> userDto =  userServiceRestTemplate.exchange("/user/id?id="+reserv.getUserId(), HttpMethod.GET, null, UserDto.class);
+            if(userDto.getBody()==null)
+                throw new IllegalArgumentException("No user found ");
+            reminders.add(reservationMapper.notificationFromReservation(userDto.getBody(),reserv));
+        }
+        return reminders;
     }
 
     @Override

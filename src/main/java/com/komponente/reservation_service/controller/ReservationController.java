@@ -1,5 +1,6 @@
 package com.komponente.reservation_service.controller;
 
+import com.komponente.reservation_service.dto.NotificationDto;
 import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
 import com.komponente.reservation_service.service.ReservationService;
@@ -39,7 +40,7 @@ public class ReservationController {
 
 
     @GetMapping("/remind")
-    public ResponseEntity<List<ReservationDto>> getReservationsToRemind() {
+    public ResponseEntity<List<NotificationDto>> getReservationsToRemind() {
         return new ResponseEntity<>(reservationService.getReservationsToReminded(), HttpStatus.OK);
     }
 
