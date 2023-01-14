@@ -56,4 +56,22 @@ public class CompanyServiceImpl implements CompanyService {
         companyIdDto.setId(optionalCompany.get().getId());
         return companyIdDto;
     }
+
+    @Override
+    public CompanyDto updateCompany(Long id, CompanyDto companyDto) {
+        Optional<Company> optionalCompany = companyRepo.findByName(companyDto.getName());
+        if(optionalCompany.isPresent() && !optionalCompany.get().getId().equals(id))
+            throw new IllegalArgumentException("Company with name " + companyDto.getName() + " already exists");
+
+        Optional<Company> optional = companyRepo.findById(id);
+        if(!optional.isPresent())
+            throw new IllegalArgumentException("Company with id " + id + " does not exist");
+
+        Company company = optional.get();
+        company.setName(companyDto.getName());
+        company.setInfo(companyDto.getInfo());
+        companyRepo.save(company);
+
+        return companyDto;
+    }
 }

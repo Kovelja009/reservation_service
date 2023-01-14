@@ -8,4 +8,5 @@ public interface CompanyService {
     String changeInfo(Long id,String info);
     CompanyDto addCompany(CompanyDto companyDto);
     CompanyIdDto getCompany(String name);
+    CompanyDto updateCompany(Long id, CompanyDto companyDto);
 }

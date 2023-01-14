@@ -17,6 +17,21 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
+    @PostMapping("/add_company")
+    public ResponseEntity<CompanyDto> addCompany(@RequestBody @Valid CompanyDto companyDto) {
+        return new ResponseEntity<>(companyService.addCompany(companyDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/get_company")
+    public ResponseEntity<CompanyIdDto> getCompany(@RequestParam @Valid String name) {
+        return new ResponseEntity<>(companyService.getCompany(name), HttpStatus.OK);
+    }
+
+    @PostMapping("/update")// id of the company we are changing
+    public ResponseEntity<CompanyDto> updateCompany(@RequestParam @Valid Long id, @RequestBody @Valid CompanyDto companyDto) {
+        return new ResponseEntity<>(companyService.updateCompany(id, companyDto), HttpStatus.OK);
+    }
+
     @PostMapping("/change_name")
     public ResponseEntity<String> changeName(@RequestParam @Valid Long id, @RequestParam @Valid String name) {
         return new ResponseEntity<>(companyService.changeName(id, name), HttpStatus.OK);
@@ -27,13 +42,4 @@ public class CompanyController {
         return new ResponseEntity<>(companyService.changeInfo(id, info), HttpStatus.OK);
     }
 
-    @PostMapping("/add_company")
-    public ResponseEntity<CompanyDto> addCompany(@RequestBody @Valid CompanyDto companyDto) {
-        return new ResponseEntity<>(companyService.addCompany(companyDto), HttpStatus.CREATED);
-    }
-
-    @GetMapping("/get_company")
-    public ResponseEntity<CompanyIdDto> getCompany(@RequestParam @Valid String name) {
-        return new ResponseEntity<>(companyService.getCompany(name), HttpStatus.OK);
-    }
 }
