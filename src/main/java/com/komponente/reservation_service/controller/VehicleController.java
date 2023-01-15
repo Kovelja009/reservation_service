@@ -56,7 +56,7 @@ public class VehicleController {
     }
 
 //    city and company are optional (empty string if not specified) but dates and order must be specified
-    @PostMapping("/available_vehicles")
+    @GetMapping("/available_vehicles")
     public ResponseEntity<List<VehicleDto>> getAllAvailableVehicles(@RequestParam String city, @RequestParam String company, @RequestParam Date startDate, @RequestParam Date endDate, @RequestParam boolean asc) {
         return new ResponseEntity<>(vehicleService.getAllAvailableVehicles(city, company, startDate, endDate, asc), HttpStatus.OK);
     }
