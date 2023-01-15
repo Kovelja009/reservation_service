@@ -12,8 +12,6 @@ import java.sql.Date;
 public class ReservationCreateDto {
     @NotBlank
     private String plateNumber;
-    @NotBlank
-    private long userId;
     @NotNull
     private Date startDate;
     @NotNull

@@ -1,7 +1,6 @@
 package com.komponente.reservation_service.repository;
 
 import com.komponente.reservation_service.model.Reservation;
-import com.komponente.reservation_service.model.Review;
 import com.komponente.reservation_service.model.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = "select * from reservations.reservation", nativeQuery = true)
     Optional<List<Reservation>> findAllReservations();
 
-    @Query(value = "select * from reservations.reservation where start_date < DATEADD(day, 3, GETDATE()) and reminded=false", nativeQuery = true)
+    @Query(value = "select * from reservations.reservation where start_date < DATEDIFF(start_date, CURDATE()) and reminded=false", nativeQuery = true)
     Optional<List<Reservation>> findReservationForRemind();
 
     Optional<List<Reservation>> findByVehicle(Vehicle vehicle);

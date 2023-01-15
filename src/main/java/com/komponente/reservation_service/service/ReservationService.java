@@ -7,7 +7,7 @@ import com.komponente.reservation_service.dto.ReservationDto;
 import java.util.List;
 
 public interface ReservationService {
-    ReservationDto createReservation(ReservationCreateDto reservationDto);
+    ReservationDto createReservation(Long userId, ReservationCreateDto reservationDto);
     ReservationDto deleteReservation(ReservationDto reservationDto);
 
     List<NotificationDto> getReservationsToReminded();
@@ -15,4 +15,7 @@ public interface ReservationService {
     List<ReservationDto> getReservations();
 
     List<ReservationDto> getReservationsForUser(Long userId);
+
+    boolean setToReminded(ReservationDto reservationDto);
+
 }

@@ -2,6 +2,8 @@ package com.komponente.reservation_service.controller;
 
 import com.komponente.reservation_service.dto.CompanyDto;
 import com.komponente.reservation_service.dto.CompanyIdDto;
+import com.komponente.reservation_service.security.CheckSecurity;
+import com.komponente.reservation_service.security.service.TokenService;
 import com.komponente.reservation_service.service.CompanyService;
 import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -12,13 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/company")
 public class CompanyController {
     private CompanyService companyService;
+    private TokenService tokenService;
 
     public CompanyController(CompanyService companyService) {
         this.companyService = companyService;
     }
 
     @PostMapping("/add_company")
-    public ResponseEntity<CompanyDto> addCompany(@RequestBody @Valid CompanyDto companyDto) {
+    @CheckSecurity(roles = {"ROLE_ADMIN"})
+    public ResponseEntity<CompanyDto> addCompany(@RequestHeader("Authorization") String authorization, @RequestBody @Valid CompanyDto companyDto) {
         return new ResponseEntity<>(companyService.addCompany(companyDto), HttpStatus.CREATED);
     }
 
@@ -27,19 +31,9 @@ public class CompanyController {
         return new ResponseEntity<>(companyService.getCompany(name), HttpStatus.OK);
     }
 
-    @PostMapping("/update")// id of the company we are changing
-    public ResponseEntity<CompanyDto> updateCompany(@RequestParam @Valid Long id, @RequestBody @Valid CompanyDto companyDto) {
-        return new ResponseEntity<>(companyService.updateCompany(id, companyDto), HttpStatus.OK);
+    @PostMapping("/update")
+    @CheckSecurity(roles = {"ROLE_MANAGER"})
+    public ResponseEntity<CompanyDto> updateCompany(@RequestHeader("Authorization") String authorization, @RequestBody @Valid CompanyDto companyDto) {
+        return new ResponseEntity<>(companyService.updateCompany(tokenService.getIdFromToken(authorization), companyDto), HttpStatus.OK);
     }
-
-    @PostMapping("/change_name")
-    public ResponseEntity<String> changeName(@RequestParam @Valid Long id, @RequestParam @Valid String name) {
-        return new ResponseEntity<>(companyService.changeName(id, name), HttpStatus.OK);
-    }
-
-    @PostMapping("/change_info")
-    public ResponseEntity<String> changeInfo(@RequestParam @Valid Long id, @RequestParam @Valid String info) {
-        return new ResponseEntity<>(companyService.changeInfo(id, info), HttpStatus.OK);
-    }
-
 }

@@ -1,6 +1,7 @@
 package com.komponente.reservation_service.service.impl;
 
 import com.komponente.reservation_service.dto.VehicleDto;
+import com.komponente.reservation_service.exceptions.IllegalArgumentException;
 import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.mapper.VehicleMapper;
 import com.komponente.reservation_service.model.Company;
@@ -68,8 +69,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<VehicleDto> getAllAvailableVehicles(String city, String company, Date startDate, Date endDate) {
-        int query = getRightQuery(city, company);
+    public List<VehicleDto> getAllAvailableVehicles(String city, String company, Date startDate, Date endDate, boolean asc) {
+        if(startDate.after(endDate))
+            throw new IllegalArgumentException("Start date must be before end date");
+
+        int query = getRightQuery(city, company, asc);
         Optional<List<Vehicle>> vehicleOptional = null;
 
         switch (query) {
@@ -84,6 +88,18 @@ public class VehicleServiceImpl implements VehicleService {
                 break;
             case 4 :
                 vehicleOptional = vehicleRepo.findAllAvailableVehicles();
+                break;
+            case 5 :
+                vehicleOptional = vehicleRepo.findByCityAndCompanyDesc(city, company);
+                break;
+            case 6 :
+                vehicleOptional = vehicleRepo.findByCityDesc(city);
+                break;
+            case 7 :
+                vehicleOptional = vehicleRepo.findByCompanyDesc(company);
+                break;
+            case 8 :
+                vehicleOptional = vehicleRepo.findAllAvailableVehiclesDesc();
         }
 
         if(!vehicleOptional.isPresent() || vehicleOptional.get().isEmpty())
@@ -117,14 +133,29 @@ public class VehicleServiceImpl implements VehicleService {
         return vehicles;
     }
 
-    protected static int getRightQuery(String city, String company) {
-        if(!city.equals("") && !company.equals(""))
-            return 1;
-        else if(!city.equals("") && company.equals(""))
-            return 2;
-        else if(city.equals("") && !company.equals(""))
-            return 3;
-        else
+    protected static int getRightQuery(String city, String company, boolean asc) {
+        if(!city.equals("") && !company.equals("")){
+            if(asc)
+                return 1;
+            else
+                return 5;
+        }
+        else if(!city.equals("") && company.equals("")){
+            if(asc)
+                return 2;
+            else
+                return 6;
+        }
+        else if(city.equals("") && !company.equals("")){
+            if(asc)
+                return 3;
+            else
+                return 7;
+        }
+
+        if(asc)
             return 4;
+        else
+            return 8;
     }
 }

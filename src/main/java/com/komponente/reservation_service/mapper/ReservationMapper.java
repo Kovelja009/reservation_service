@@ -21,7 +21,7 @@ public class ReservationMapper {
         this.vehicleRepo = vehicleRepository;
     }
 
-    public Reservation reservationCreateDtoToReservation(ReservationCreateDto reservationDto) {
+    public Reservation reservationCreateDtoToReservation(Long userId, ReservationCreateDto reservationDto) {
         Optional<Vehicle> vehicle = vehicleRepo.findByPlateNumber(reservationDto.getPlateNumber());
         if(!vehicle.isPresent())
             throw new NotFoundException("Vehicle with plate number " + reservationDto.getPlateNumber() + " not found");
@@ -29,7 +29,7 @@ public class ReservationMapper {
         reservation.setVehicle(vehicle.get());
         reservation.setStartDate(reservationDto.getStartDate());
         reservation.setEndDate(reservationDto.getEndDate());
-        reservation.setUserId(reservationDto.getUserId());
+        reservation.setUserId(userId);
 
         return reservation;
     }

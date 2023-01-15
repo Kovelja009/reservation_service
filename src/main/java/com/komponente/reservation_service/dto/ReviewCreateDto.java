@@ -18,6 +18,4 @@ public class ReviewCreateDto {
     private String comment;
     @NotBlank
     private String vehiclePlateNumber;
-    @NotNull
-    private Long userId;
 }

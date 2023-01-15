@@ -6,7 +6,9 @@ import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.model.Review;
 import com.komponente.reservation_service.model.Vehicle;
 import com.komponente.reservation_service.repository.VehicleRepository;
+import com.komponente.reservation_service.service.impl.ReservationServiceImpl;
 import com.komponente.reservation_service.user_sync_comm.dto.UserDto;
+import io.github.resilience4j.retry.Retry;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,9 @@ import java.util.Optional;
 public class ReviewMapper {
     private VehicleRepository vehicleRepo;
     private RestTemplate userServiceRestTemplate;
-    public Review reviewCreateDtoToReview(ReviewCreateDto reviewDto) {
+    private Retry serviceRetry;
+
+    public Review reviewCreateDtoToReview(Long userId, ReviewCreateDto reviewDto) {
         Optional<Vehicle> vehicle = vehicleRepo.findByPlateNumber(reviewDto.getVehiclePlateNumber());
         if(!vehicle.isPresent())
             throw new NotFoundException("Vehicle with plate number " + reviewDto.getVehiclePlateNumber() + " not found");
@@ -28,7 +32,7 @@ public class ReviewMapper {
         review.setVehicle(vehicle.get());
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
-        review.setUser_id(reviewDto.getUserId());
+        review.setUser_id(userId);
 
         return review;
     }
@@ -38,10 +42,10 @@ public class ReviewMapper {
         reviewDto.setVehiclePlateNumber(review.getVehicle().getPlateNumber());
         reviewDto.setRating(review.getRating());
         reviewDto.setComment(review.getComment());
-        ResponseEntity<UserDto> userDto =  userServiceRestTemplate.exchange("/user/id?id="+review.getUser_id().toString(), HttpMethod.GET, null, UserDto.class);
-        if(userDto.getBody() == null)
+        UserDto userDto = Retry.decorateSupplier(serviceRetry, () -> ReservationServiceImpl.getUser(review.getUser_id(), userServiceRestTemplate)).get();
+        if(userDto == null)
             throw new NotFoundException("User with id " + review.getUser_id() + " not found");
-        reviewDto.setUsername(userDto.getBody().getUsername());
+        reviewDto.setUsername(userDto.getUsername());
 
         return reviewDto;
     }

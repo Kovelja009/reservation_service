@@ -3,6 +3,8 @@ package com.komponente.reservation_service.controller;
 import com.komponente.reservation_service.dto.NotificationDto;
 import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
+import com.komponente.reservation_service.security.CheckSecurity;
+import com.komponente.reservation_service.security.service.TokenService;
 import com.komponente.reservation_service.service.ReservationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,14 +19,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
+    private TokenService tokenService;
+
     private ReservationService reservationService;
     @PostMapping("/create")
-    public ResponseEntity<ReservationDto> createReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
-        return new ResponseEntity<>(reservationService.createReservation(reservationCreateDto), HttpStatus.OK);
+    @CheckSecurity(roles = {"ROLE_CLIENT"})
+    public ResponseEntity<ReservationDto> createReservation(@RequestHeader("Authorization") String authorization, @RequestBody ReservationCreateDto reservationCreateDto) {
+        return new ResponseEntity<>(reservationService.createReservation(tokenService.getIdFromToken(authorization), reservationCreateDto), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ReservationDto> deleteReservation(@RequestBody ReservationDto reservationDto) {
+    @CheckSecurity(roles = {"ROLE_CLIENT", "ROLE_MANAGER"})
+    public ResponseEntity<ReservationDto> deleteReservation(@RequestHeader("Authorization") String authorization, @RequestBody ReservationDto reservationDto) {
         return new ResponseEntity<>(reservationService.deleteReservation(reservationDto), HttpStatus.OK);
     }
 
@@ -32,12 +38,10 @@ public class ReservationController {
     public ResponseEntity<List<ReservationDto>> getReservationsById(@RequestParam Long userId) {
         return new ResponseEntity<>(reservationService.getReservationsForUser(userId), HttpStatus.OK);
     }
-    //TODO dodati put za rezervacije reminded true
-    @PutMapping("/reminded")
-    public ResponseEntity<Boolean> modifyPrice(@RequestParam @Valid Long id) {
-        return new ResponseEntity<>(true,HttpStatus.OK);
+    @PostMapping("/reminded")
+    public ResponseEntity<Boolean> setToReminded(@RequestBody ReservationDto reservationDto) {
+        return new ResponseEntity<>(reservationService.setToReminded(reservationDto),HttpStatus.OK);
     }
-
 
     @GetMapping("/remind")
     public ResponseEntity<List<NotificationDto>> getReservationsToRemind() {
@@ -47,5 +51,11 @@ public class ReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationDto>> getReservations() {
         return new ResponseEntity<>(reservationService.getReservations(), HttpStatus.OK);
+    }
+
+    @GetMapping("/by_user")
+    @CheckSecurity(roles = {"ROLE_CLIENT"})
+    public ResponseEntity<List<ReservationDto>> getReservationsByUser(@RequestHeader("Authorization") String authorization) {
+        return new ResponseEntity<>(reservationService.getReservationsForUser(tokenService.getIdFromToken(authorization)), HttpStatus.OK);
     }
 }

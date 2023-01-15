@@ -4,6 +4,8 @@ import com.komponente.reservation_service.dto.CompanyRating;
 import com.komponente.reservation_service.dto.ReviewCreateDto;
 import com.komponente.reservation_service.dto.ReviewDto;
 import com.komponente.reservation_service.model.Review;
+import com.komponente.reservation_service.security.CheckSecurity;
+import com.komponente.reservation_service.security.service.TokenService;
 import com.komponente.reservation_service.service.ReviewService;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -18,11 +20,13 @@ import java.util.List;
 @RequestMapping("/review")
 public class ReviewController {
     private ReviewService reviewService;
+    private TokenService tokenService;
 
 //    make it in a way that client can only add review if he has reservation for that car
     @PostMapping("/create")
-    public ResponseEntity<ReviewDto> createReview(@RequestBody @Valid ReviewCreateDto reviewDto) {
-        return new ResponseEntity<>(reviewService.createReview(reviewDto), HttpStatus.OK);
+    @CheckSecurity(roles = {"ROLE_CLIENT"})
+    public ResponseEntity<ReviewDto> createReview(@RequestHeader("Authorization") String authorization, @RequestBody @Valid ReviewCreateDto reviewDto) {
+        return new ResponseEntity<>(reviewService.createReview(tokenService.getIdFromToken(authorization), reviewDto), HttpStatus.OK);
     }
 
 //  update functions in a way that in a dto u have to send old username and vehiclePlateNumber <but new rating and comment>
@@ -33,8 +37,9 @@ public class ReviewController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteReview(@RequestParam Long userId, @RequestParam String vehiclePlateNumber) {
-        reviewService.deleteReview(userId, vehiclePlateNumber);
+    @CheckSecurity(roles = {"ROLE_CLIENT"})
+    public ResponseEntity<?> deleteReview(@RequestHeader("Authorization") String authorization, @RequestParam String vehiclePlateNumber) {
+        reviewService.deleteReview(tokenService.getIdFromToken(authorization), vehiclePlateNumber);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

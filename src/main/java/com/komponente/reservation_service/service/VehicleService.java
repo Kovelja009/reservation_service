@@ -9,5 +9,5 @@ public interface VehicleService {
     VehicleDto addVehicle(VehicleDto vehicleDto);
     void deleteVehicle(String plateNumber);
     String changePriceForModel(String model, String company, int newPrice);
-    List<VehicleDto> getAllAvailableVehicles(String city, String company, Date startDate, Date endDate);
+    List<VehicleDto> getAllAvailableVehicles(String city, String company, Date startDate, Date endDate, boolean asc);
 }
