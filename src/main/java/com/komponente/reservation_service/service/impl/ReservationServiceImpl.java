@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -37,6 +38,8 @@ public class ReservationServiceImpl implements ReservationService {
     private ReservationMapper reservationMapper;
     private VehicleRepository vehicleRepo;
     private Retry serviceRetry;
+    private JmsTemplate jmsTemplate;
+    private MessageHelper messageHelper;
 
     @Override
     public ReservationDto createReservation(Long userId, ReservationCreateDto reservationCreateDto) {
@@ -61,6 +64,9 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setReminded(false);
         reservationRepo.save(reservation);
 
+        NotificationDto activationMailDto = reservationMapper.notificationFromReservation(userDto,reservation);
+        jmsTemplate.convertAndSend("reservation", messageHelper.createTextMessage(activationMailDto));
+
 //      notify user service
         Retry.decorateSupplier(serviceRetry, () -> userServiceRestTemplate.exchange("/client/update_rent_days?user_id="+reservation.getUserId().toString() + "&rentDays=" + days_between, HttpMethod.POST, null, Integer.class));
 
@@ -74,6 +80,11 @@ public class ReservationServiceImpl implements ReservationService {
         Optional<Reservation> reservation = reservationRepo.findReservationForDeleting(reservationDto.getPlateNumber(), reservationDto.getStartDate(), reservationDto.getEndDate());
         if(!reservation.isPresent())
             throw new IllegalArgumentException("Reservation not found");
+
+//        TODO Treba mi ovde userDto
+//        UserDto userDto = Retry.decorateSupplier(serviceRetry, () -> getUser(r, userServiceRestTemplate)).get();
+//        NotificationDto activationMailDto = reservationMapper.notificationFromReservation(,reservation);
+//        jmsTemplate.convertAndSend("reservation", messageHelper.createTextMessage(activationMailDto));
 
 //      notify user service
         int days_between = (int) (((reservationDto.getEndDate().getTime() - reservationDto.getStartDate().getTime()) / (1000 * 60 * 60 * 24))+1);

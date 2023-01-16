@@ -3,6 +3,7 @@ package com.komponente.reservation_service.controller;
 import com.komponente.reservation_service.dto.ModelDto;
 import com.komponente.reservation_service.dto.TypeDto;
 import com.komponente.reservation_service.dto.VehicleDto;
+import com.komponente.reservation_service.dto.VehicleListDto;
 import com.komponente.reservation_service.security.CheckSecurity;
 import com.komponente.reservation_service.service.ModelService;
 import com.komponente.reservation_service.service.TypeService;
@@ -57,7 +58,7 @@ public class VehicleController {
 
 //    city and company are optional (empty string if not specified) but dates and order must be specified
     @GetMapping("/available_vehicles")
-    public ResponseEntity<List<VehicleDto>> getAllAvailableVehicles(@RequestParam String city, @RequestParam String company, @RequestParam Date startDate, @RequestParam Date endDate, @RequestParam boolean asc) {
-        return new ResponseEntity<>(vehicleService.getAllAvailableVehicles(city, company, startDate, endDate, asc), HttpStatus.OK);
+    public ResponseEntity<VehicleListDto> getAllAvailableVehicles(@RequestParam String city, @RequestParam String company, @RequestParam Date startDate, @RequestParam Date endDate, @RequestParam boolean asc) {
+        return new ResponseEntity<>(new VehicleListDto(vehicleService.getAllAvailableVehicles(city, company, startDate, endDate, asc)), HttpStatus.OK);
     }
 }

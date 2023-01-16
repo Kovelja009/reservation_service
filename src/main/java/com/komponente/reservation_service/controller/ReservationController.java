@@ -3,6 +3,7 @@ package com.komponente.reservation_service.controller;
 import com.komponente.reservation_service.dto.NotificationDto;
 import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
+import com.komponente.reservation_service.dto.ReservationListDto;
 import com.komponente.reservation_service.security.CheckSecurity;
 import com.komponente.reservation_service.security.service.TokenService;
 import com.komponente.reservation_service.service.ReservationService;
@@ -35,8 +36,8 @@ public class ReservationController {
     }
 
     @GetMapping("/id")
-    public ResponseEntity<List<ReservationDto>> getReservationsById(@RequestParam Long userId) {
-        return new ResponseEntity<>(reservationService.getReservationsForUser(userId), HttpStatus.OK);
+    public ResponseEntity<ReservationListDto> getReservationsById(@RequestParam Long userId) {
+        return new ResponseEntity<>(new ReservationListDto(reservationService.getReservationsForUser(userId)), HttpStatus.OK);
     }
     @PostMapping("/reminded")
     public ResponseEntity<Boolean> setToReminded(@RequestBody ReservationDto reservationDto) {
@@ -45,17 +46,18 @@ public class ReservationController {
 
     @GetMapping("/remind")
     public ResponseEntity<List<NotificationDto>> getReservationsToRemind() {
+        System.out.println("salje");
         return new ResponseEntity<>(reservationService.getReservationsToReminded(), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationDto>> getReservations() {
-        return new ResponseEntity<>(reservationService.getReservations(), HttpStatus.OK);
+    public ResponseEntity<ReservationListDto> getReservations() {
+        return new ResponseEntity<>(new ReservationListDto(reservationService.getReservations()), HttpStatus.OK);
     }
 
     @GetMapping("/by_user")
     @CheckSecurity(roles = {"ROLE_CLIENT"})
-    public ResponseEntity<List<ReservationDto>> getReservationsByUser(@RequestHeader("Authorization") String authorization) {
-        return new ResponseEntity<>(reservationService.getReservationsForUser(tokenService.getIdFromToken(authorization)), HttpStatus.OK);
+    public ResponseEntity<ReservationListDto> getReservationsByUser(@RequestHeader("Authorization") String authorization) {
+        return new ResponseEntity<>(new ReservationListDto(reservationService.getReservationsForUser(tokenService.getIdFromToken(authorization))), HttpStatus.OK);
     }
 }
