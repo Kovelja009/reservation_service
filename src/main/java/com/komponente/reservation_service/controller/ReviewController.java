@@ -1,8 +1,6 @@
 package com.komponente.reservation_service.controller;
 
-import com.komponente.reservation_service.dto.CompanyRating;
-import com.komponente.reservation_service.dto.ReviewCreateDto;
-import com.komponente.reservation_service.dto.ReviewDto;
+import com.komponente.reservation_service.dto.*;
 import com.komponente.reservation_service.model.Review;
 import com.komponente.reservation_service.security.CheckSecurity;
 import com.komponente.reservation_service.security.service.TokenService;
@@ -45,13 +43,13 @@ public class ReviewController {
 
 //    city and company are optional (empty string if not specified)
     @GetMapping("/filtered_reviews")
-    public ResponseEntity<List<ReviewDto>> filteredReviews(@RequestParam String city, @RequestParam String company) {
-        return new ResponseEntity<>(reviewService.filteredReviews(city, company), HttpStatus.OK);
+    public ResponseEntity<ReviewListDto> filteredReviews(@RequestParam String city, @RequestParam String company) {
+        return new ResponseEntity<>(new ReviewListDto(reviewService.filteredReviews(city, company)), HttpStatus.OK);
     }
 
     @GetMapping("/company_ratings")
-    public ResponseEntity<List<CompanyRating>> companyRatings() {
-        return new ResponseEntity<>(reviewService.companyRatings(), HttpStatus.OK);
+    public ResponseEntity<CompanyRatingListDto> companyRatings() {
+        return new ResponseEntity<>(new CompanyRatingListDto(reviewService.companyRatings()), HttpStatus.OK);
     }
 
 }

@@ -35,7 +35,7 @@ public class ReservationMapper {
     }
 
     public NotificationDto notificationFromReservation(UserDto userDto,Reservation reservation){
-        return new NotificationDto(userDto.getEmail(),"remind",
+        return new NotificationDto(userDto.getEmail(),"reservation",
                 "Dear %s %s,\n Your reservation in %s for vehicle %s is in 3 days",
                 userDto.getFirstName(), userDto.getLastName(), reservation.getVehicle().getCompany().getName(),
                 null,reservation.getVehicle().getModel().getModel(),null);
