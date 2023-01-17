@@ -3,21 +3,14 @@ package com.komponente.reservation_service.service.impl;
 import com.komponente.reservation_service.dto.CompanyRating;
 import com.komponente.reservation_service.dto.ReviewCreateDto;
 import com.komponente.reservation_service.dto.ReviewDto;
-import com.komponente.reservation_service.exceptions.ForbiddenException;
-import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.mapper.ReviewMapper;
 import com.komponente.reservation_service.model.Review;
 import com.komponente.reservation_service.repository.ReviewRepository;
 import com.komponente.reservation_service.service.ReviewService;
 import com.komponente.reservation_service.user_sync_comm.dto.UserDto;
-import com.komponente.reservation_service.user_sync_comm.dto.UserIdDto;
 import io.github.resilience4j.retry.Retry;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -31,12 +24,13 @@ public class ReviewServiceImpl implements ReviewService {
     private ReviewMapper reviewMapper;
     private RestTemplate userServiceRestTemplate;
     private Retry serviceRetry;
+    private RetryPatternHelper retryPatternHelper;
 
     @Override
     public ReviewDto createReview(Long userId, ReviewCreateDto reviewCreateDto) {
         Review review = reviewMapper.reviewCreateDtoToReview(userId, reviewCreateDto);
 
-        UserDto userDto = Retry.decorateSupplier(serviceRetry, () -> ReservationServiceImpl.getUser(review.getUser_id(), userServiceRestTemplate)).get();
+        UserDto userDto = retryPatternHelper.getUserByRetry(review.getUser_id(), userServiceRestTemplate);
         if (reviewRepo.findReviewForDeleting(review.getVehicle().getPlateNumber(), review.getUser_id()).isPresent())
             throw new IllegalArgumentException("User with username " + userDto.getUsername() + " has already reviewed vehicle with plate number " + review.getVehicle().getPlateNumber());
         reviewRepo.save(review);
@@ -57,10 +51,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void updateReview(ReviewDto reviewDto) {
-        UserIdDto userId =  Retry.decorateSupplier(serviceRetry, () -> ReservationServiceImpl.getuUserId(reviewDto.getUsername(), userServiceRestTemplate)).get();
-        Optional<Review> review = reviewRepo.findReviewForDeleting(reviewDto.getVehiclePlateNumber(), userId.getId());
+        Long userId = retryPatternHelper.getUserIdByRetry(reviewDto.getUsername(), userServiceRestTemplate);
+        Optional<Review> review = reviewRepo.findReviewForDeleting(reviewDto.getVehiclePlateNumber(), userId);
         if (!review.isPresent())
-            throw new IllegalArgumentException("Review for vehicle with plate number " + reviewDto.getVehiclePlateNumber() + " and user with id " + userId.getId() + " not found");
+            throw new IllegalArgumentException("Review for vehicle with plate number " + reviewDto.getVehiclePlateNumber() + " and user with id " + userId + " not found");
         review.get().setComment(reviewDto.getComment());
         review.get().setRating(reviewDto.getRating());
         reviewRepo.save(review.get());

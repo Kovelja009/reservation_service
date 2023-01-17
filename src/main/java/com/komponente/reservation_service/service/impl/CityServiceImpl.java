@@ -4,11 +4,13 @@ import com.komponente.reservation_service.model.City;
 import com.komponente.reservation_service.repository.CityRepository;
 import com.komponente.reservation_service.service.CityService;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @AllArgsConstructor
+@Getter
 @Service
 public class CityServiceImpl implements CityService {
     private CityRepository cityRepo;

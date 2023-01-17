@@ -2,18 +2,13 @@ package com.komponente.reservation_service.service.impl;
 
 import com.komponente.reservation_service.dto.CompanyDto;
 import com.komponente.reservation_service.dto.CompanyIdDto;
-import com.komponente.reservation_service.exceptions.ForbiddenException;
-import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.mapper.CompanyMapper;
 import com.komponente.reservation_service.model.Company;
 import com.komponente.reservation_service.repository.CompanyRepository;
 import com.komponente.reservation_service.service.CompanyService;
 import io.github.resilience4j.retry.Retry;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -25,6 +20,7 @@ public class CompanyServiceImpl implements CompanyService {
     private CompanyMapper companyMapper;
     private RestTemplate userServiceRestTemplate;
     private Retry serviceRetry;
+    private RetryPatternHelper retryPatternHelper;
 
     @Override
     public String changeName(Long id, String name) {
@@ -70,7 +66,7 @@ public class CompanyServiceImpl implements CompanyService {
     public CompanyDto updateCompany(Long userId, CompanyDto companyDto) {
 
         Optional<Company> optionalCompany = companyRepo.findByName(companyDto.getName());
-        String str_id = Retry.decorateSupplier(serviceRetry, () -> ReservationServiceImpl.getCompanyId(userId, userServiceRestTemplate)).get();
+        String str_id = retryPatternHelper.getCompanyIdByRetry(userId, userServiceRestTemplate);
         Long id = Long.parseLong(str_id);
         if(optionalCompany.isPresent() && !optionalCompany.get().getId().equals(id))
             throw new IllegalArgumentException("Company with name " + companyDto.getName() + " already exists");

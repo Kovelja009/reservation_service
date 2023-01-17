@@ -6,12 +6,10 @@ import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.model.Review;
 import com.komponente.reservation_service.model.Vehicle;
 import com.komponente.reservation_service.repository.VehicleRepository;
-import com.komponente.reservation_service.service.impl.ReservationServiceImpl;
+import com.komponente.reservation_service.service.impl.RetryPatternHelper;
 import com.komponente.reservation_service.user_sync_comm.dto.UserDto;
 import io.github.resilience4j.retry.Retry;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +21,7 @@ public class ReviewMapper {
     private VehicleRepository vehicleRepo;
     private RestTemplate userServiceRestTemplate;
     private Retry serviceRetry;
+    private RetryPatternHelper retryPatternHelper;
 
     public Review reviewCreateDtoToReview(Long userId, ReviewCreateDto reviewDto) {
         Optional<Vehicle> vehicle = vehicleRepo.findByPlateNumber(reviewDto.getVehiclePlateNumber());
@@ -42,7 +41,7 @@ public class ReviewMapper {
         reviewDto.setVehiclePlateNumber(review.getVehicle().getPlateNumber());
         reviewDto.setRating(review.getRating());
         reviewDto.setComment(review.getComment());
-        UserDto userDto = Retry.decorateSupplier(serviceRetry, () -> ReservationServiceImpl.getUser(review.getUser_id(), userServiceRestTemplate)).get();
+        UserDto userDto = retryPatternHelper.getUserByRetry(review.getUser_id(), userServiceRestTemplate);
         if(userDto == null)
             throw new NotFoundException("User with id " + review.getUser_id() + " not found");
         reviewDto.setUsername(userDto.getUsername());
