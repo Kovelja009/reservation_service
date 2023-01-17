@@ -112,7 +112,7 @@ public class VehicleServiceImpl implements VehicleService {
 
         for(Vehicle vehicle : vehiclesList) {
             Optional<List<Reservation>> reservationsOptional = reservationRepo.findByVehicle(vehicle);
-            if(!vehicleOptional.isPresent())
+            if(!reservationsOptional.isPresent())
                 vehicles.add(vehicleMapper.vehicleToVehicleDto(vehicle));
             else{
                 List<Reservation> reservations = reservationsOptional.get();

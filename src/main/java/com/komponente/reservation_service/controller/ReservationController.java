@@ -1,9 +1,6 @@
 package com.komponente.reservation_service.controller;
 
-import com.komponente.reservation_service.dto.NotificationDto;
-import com.komponente.reservation_service.dto.ReservationCreateDto;
-import com.komponente.reservation_service.dto.ReservationDto;
-import com.komponente.reservation_service.dto.ReservationListDto;
+import com.komponente.reservation_service.dto.*;
 import com.komponente.reservation_service.security.CheckSecurity;
 import com.komponente.reservation_service.security.service.TokenService;
 import com.komponente.reservation_service.service.ReservationService;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -45,9 +43,12 @@ public class ReservationController {
     }
 
     @GetMapping("/remind")
-    public ResponseEntity<List<NotificationDto>> getReservationsToRemind() {
-        System.out.println("salje");
-        return new ResponseEntity<>(reservationService.getReservationsToReminded(), HttpStatus.OK);
+    public ResponseEntity<NotificationListDto> getReservationsToRemind() {
+        try {
+            return new ResponseEntity<>(new NotificationListDto(reservationService.getReservationsToReminded()), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(new NotificationListDto(new ArrayList<>()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping

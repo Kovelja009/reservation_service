@@ -18,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = "select * from reservations.reservation", nativeQuery = true)
     Optional<List<Reservation>> findAllReservations();
 
-    @Query(value = "select * from reservations.reservation where start_date < DATEDIFF(start_date, CURDATE()) and reminded=false", nativeQuery = true)
+    @Query(value = "select * from reservations.reservation where 3 > DATEDIFF(start_date, CURDATE()) and reminded=false", nativeQuery = true)
     Optional<List<Reservation>> findReservationForRemind();
 
     Optional<List<Reservation>> findByVehicle(Vehicle vehicle);

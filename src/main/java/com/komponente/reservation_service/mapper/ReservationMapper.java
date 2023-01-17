@@ -41,6 +41,13 @@ public class ReservationMapper {
                 null,reservation.getVehicle().getModel().getModel(),null);
     }
 
+    public NotificationDto notificationFromReservationReservationConf(UserDto userDto,Reservation reservation){
+        return new NotificationDto(userDto.getEmail(),"reservationConf",
+                "Dear %s %s,\n Your reservation in %s for vehicle %s is confirmed",
+                userDto.getFirstName(), userDto.getLastName(), reservation.getVehicle().getCompany().getName(),
+                null,reservation.getVehicle().getModel().getModel(),null);
+    }
+
     public ReservationDto reservationCreateDtoToReservationDto(ReservationCreateDto reservationDto) {
         ReservationDto reservation = new ReservationDto();
         reservation.setPlateNumber(reservationDto.getPlateNumber());
@@ -58,5 +65,12 @@ public class ReservationMapper {
         reservationDto.setStartDate(reservation.getStartDate());
         reservationDto.setEndDate(reservation.getEndDate());
         return reservationDto;
+    }
+
+    public NotificationDto notificationFromReservationCancel(UserDto userDto, Reservation reservation) {
+        return new NotificationDto(userDto.getEmail(),"cancel_reservation",
+                "Dear %s %s,\n Your reservation in %s for vehicle %s is canceled",
+                userDto.getFirstName(), userDto.getLastName(), reservation.getVehicle().getCompany().getName(),
+                null,reservation.getVehicle().getModel().getModel(),null);
     }
 }

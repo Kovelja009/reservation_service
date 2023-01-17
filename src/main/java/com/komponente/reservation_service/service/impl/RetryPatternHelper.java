@@ -22,6 +22,11 @@ public class RetryPatternHelper {
         return Retry.decorateSupplier(serviceRetry, () -> getUser(userId, userServiceRestTemplate)).get();
     }
 
+    public UserDto getManagerByRetry(Long companyId, RestTemplate userServiceRestTemplate) {
+        return Retry.decorateSupplier(serviceRetry, () -> getUser(companyId, userServiceRestTemplate)).get();
+    }
+
+
     private UserDto getUser(Long userId, RestTemplate userServiceRestTemplate){
         try {
             return userServiceRestTemplate.exchange("/user/id?id="+userId, HttpMethod.GET, null, UserDto.class).getBody();
@@ -29,6 +34,26 @@ public class RetryPatternHelper {
         }catch(HttpClientErrorException e){
             if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
                 throw new NotFoundException("User with id " + userId + " not found");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                throw new IllegalArgumentException("Bad request");
+            }
+            if(e.getStatusCode().equals(HttpStatus.FORBIDDEN)){
+                throw new ForbiddenException("Forbidden");
+            }
+        }catch (Exception e){
+            throw new RuntimeException("Error while getting user");
+        }
+        return null;
+    }
+
+    private UserDto getManager(Long companyId, RestTemplate userServiceRestTemplate){
+        try {
+            return userServiceRestTemplate.exchange("/manager/manager_by_company?companyId="+companyId, HttpMethod.GET, null, UserDto.class).getBody();
+
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                throw new NotFoundException("User with id " + companyId + " not found");
             }
             if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
                 throw new IllegalArgumentException("Bad request");

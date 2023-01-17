@@ -3,8 +3,10 @@ package com.komponente.reservation_service.service.impl;
 import com.komponente.reservation_service.dto.NotificationDto;
 import com.komponente.reservation_service.dto.ReservationCreateDto;
 import com.komponente.reservation_service.dto.ReservationDto;
+import com.komponente.reservation_service.exceptions.NotFoundException;
 import com.komponente.reservation_service.mapper.ReservationMapper;
 import com.komponente.reservation_service.model.Reservation;
+import com.komponente.reservation_service.model.Vehicle;
 import com.komponente.reservation_service.repository.ReservationRepository;
 import com.komponente.reservation_service.repository.VehicleRepository;
 import com.komponente.reservation_service.service.ReservationService;
@@ -45,17 +47,24 @@ public class ReservationServiceImpl implements ReservationService {
 
 //      calculate price
         int days_between = (int) (((reservationDto.getEndDate().getTime() - reservationDto.getStartDate().getTime()) / (1000 * 60 * 60 * 24))+1);
-        int price = vehicleRepo.findByPlateNumber(reservationCreateDto.getPlateNumber()).get().getPricePerDay() * days_between;
+        Vehicle vehicle = vehicleRepo.findByPlateNumber(reservationCreateDto.getPlateNumber()).get();
+        int price = vehicle.getPricePerDay() * days_between;
         int discount = rankDto.getDiscount();
         reservationDto.setPrice(price * (100 - discount) / 100);
+
+        Long companyId = vehicle.getCompany().getId();
+        UserDto managerDto = retryPatternHelper.getManagerByRetry(companyId, userServiceRestTemplate);
 
         Reservation reservation = reservationMapper.reservationCreateDtoToReservation(userId, reservationCreateDto);
         reservation.setPrice(reservationDto.getPrice());
         reservation.setReminded(false);
         reservationRepo.save(reservation);
 
-        NotificationDto activationMailDto = reservationMapper.notificationFromReservation(userDto,reservation);
+        NotificationDto activationMailDto = reservationMapper.notificationFromReservationReservationConf(userDto,reservation);
+        NotificationDto activationMailDto1 = reservationMapper.notificationFromReservationReservationConf(managerDto,reservation);
         jmsTemplate.convertAndSend("reservation", messageHelper.createTextMessage(activationMailDto));
+        jmsTemplate.convertAndSend("reservation", messageHelper.createTextMessage(activationMailDto1));
+
 
 //      notify user service
         retryPatternHelper.updateUserByRetry(userId, days_between, userServiceRestTemplate);
@@ -71,11 +80,14 @@ public class ReservationServiceImpl implements ReservationService {
             throw new IllegalArgumentException("Reservation not found");
 
 //        TODO Treba mi ovde userDto
-//        UserDto userDto = Retry.decorateSupplier(serviceRetry, () -> getUser(r, userServiceRestTemplate)).get();
-//        NotificationDto activationMailDto = reservationMapper.notificationFromReservation(,reservation);
-//        jmsTemplate.convertAndSend("reservation", messageHelper.createTextMessage(activationMailDto));
-
+        UserDto userDto = retryPatternHelper.getUserByRetry(reservation.get().getUserId(), userServiceRestTemplate);
+        UserDto managerDto = retryPatternHelper.getManagerByRetry(reservation.get().getVehicle().getCompany().getId(), userServiceRestTemplate);
+        NotificationDto activationMailDto = reservationMapper.notificationFromReservationCancel(userDto,reservation.get());
+        NotificationDto activationMailDto1 = reservationMapper.notificationFromReservationCancel(managerDto,reservation.get());
+        jmsTemplate.convertAndSend("cancel_reservation", messageHelper.createTextMessage(activationMailDto));
+        jmsTemplate.convertAndSend("cancel_reservation", messageHelper.createTextMessage(activationMailDto1));
 //      notify user service
+
         int days_between = (int) (((reservationDto.getEndDate().getTime() - reservationDto.getStartDate().getTime()) / (1000 * 60 * 60 * 24))+1);
         days_between = -1*(days_between);
         retryPatternHelper.updateUserByRetry(reservation.get().getUserId(), days_between, userServiceRestTemplate);
@@ -104,11 +116,11 @@ public class ReservationServiceImpl implements ReservationService {
         Optional<List<Reservation>> reservations = reservationRepo.findReservationForRemind();
         List<NotificationDto> reminders = new ArrayList<>();
         if(!reservations.isPresent() || reservations.get().isEmpty())
-            throw new IllegalArgumentException("No reservations to remind");
+            throw new NotFoundException("No reservations to remind");
         for(Reservation reserv:reservations.get()){
             UserDto userDto = retryPatternHelper.getUserByRetry(reserv.getUserId(), userServiceRestTemplate);
             if(userDto==null)
-                throw new IllegalArgumentException("No user found ");
+                throw new NotFoundException("No user found ");
             reserv.setReminded(true);
             reservationRepo.save(reserv);
             reminders.add(reservationMapper.notificationFromReservation(userDto,reserv));
