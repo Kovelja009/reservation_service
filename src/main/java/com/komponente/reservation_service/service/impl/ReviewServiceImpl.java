@@ -90,9 +90,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<CompanyRating> companyRatings() {
-        if(!reviewRepo.findCompanyRating().isPresent())
+        List<CompanyRating> list = reviewRepo.findCompanyRating();
+        if(list == null || list.isEmpty())
             throw new IllegalArgumentException("No reviews found");
-        return reviewRepo.findCompanyRating().get();
+        return list;
     }
 
 }

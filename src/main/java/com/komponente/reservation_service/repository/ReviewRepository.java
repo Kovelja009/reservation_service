@@ -28,9 +28,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query(value = "select r.id, r.comment, r.rating, r.vehicle_plate_number, r.user_id from reservations.review r join reservations.vehicle v on r.vehicle_plate_number = v.plate_number join reservations.company co on v.company_id = co.id where co.name=?1 order by r.rating asc", nativeQuery = true)
     Optional<List<Review>> findByCompany(String company);
 
-    @Query(value = "select * from reservations.review order by r.rating asc", nativeQuery = true)
+    @Query(value = "select * from reservations.review r order by r.rating asc", nativeQuery = true)
     Optional<List<Review>> findAllReviews();
 
     @Query(nativeQuery = true)
-    Optional<List<CompanyRating>> findCompanyRating();
+    List<CompanyRating> findCompanyRating();
 }
